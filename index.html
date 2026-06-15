@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenho algo para te mostrar</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #c9b8f5 0%, #a8d4f5 50%, #b8e0ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(120,100,200,0.18);
+    position: relative;
+  }
+
+  .emoji {
+    font-size: 3.5rem;
+    margin-bottom: 1.2rem;
+    display: block;
+    animation: bounce 1.6s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    color: #5b3fa6;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .subtitle {
+    color: #7a6bb0;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #9b72e8, #6db4f5);
+    color: white;
+    border: none;
+    padding: 0.85rem 2.5rem;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(130,100,220,0.35);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* Tela final */
+  .final {
+    display: none;
+  }
+  .final.active {
+    display: block;
+  }
+
+  .final h1 {
+    font-size: 2rem;
+    color: #5b3fa6;
+    margin-bottom: 0.5rem;
+  }
+
+  .confetti-emoji {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.8rem;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(10deg) scale(1.1); }
+    75% { transform: rotate(-10deg) scale(1.1); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+
+  .msg-final {
+    font-size: 1.05rem;
+    color: #6a5aa0;
+    line-height: 1.7;
+    margin: 1rem 0 1.5rem;
+  }
+
+  /* Galeria de fotos */
+  .gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 1.5rem 0;
+  }
+
+  .photo-slot {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e0d5ff, #cce8ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #b09ee8;
+    position: relative;
+  }
+
+  .photo-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
+
+  .photo-placeholder {
+    color: #a090d0;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 8px;
+  }
+
+  .photo-placeholder span {
+    font-size: 1.6rem;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Barra de progresso */
+  .progress-bar-wrap {
+    width: 100%;
+    height: 5px;
+    background: #e0d8f8;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #9b72e8, #6db4f5);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  /* Partículas de fundo */
+  .bubble {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.18;
+    pointer-events: none;
+    animation: float linear infinite;
+  }
+
+  @keyframes float {
+    from { transform: translateY(110vh) scale(1); }
+    to { transform: translateY(-10vh) scale(1.1); }
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 2rem 1.4rem; }
+    h1 { font-size: 1.25rem; }
+    .final h1 { font-size: 1.6rem; }
+    .emoji { font-size: 2.8rem; }
+    .confetti-emoji { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Bolhas decorativas de fundo -->
+<script>
+  const colors = ['#c9b8f5','#6db4f5','#a8d4f5','#e0d5ff','#9b72e8'];
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 30 + Math.random() * 70;
+    b.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      bottom:${Math.random()*-30}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${6+Math.random()*10}s;
+      animation-delay:${Math.random()*8}s;
+    `;
+    document.body.appendChild(b);
+  }
+</script>
+
+<div class="card">
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress" style="width:0%"></div>
+  </div>
+
+  <!-- Passo 0 -->
+  <div class="step active" id="step-0">
+    <span class="emoji">👀</span>
+    <h1>Oi! Tenho uma coisa para te mostrar 😊</h1>
+    <p class="subtitle">Pode ser que você goste...</p>
+    <button class="btn" onclick="nextStep()">Clique aqui</button>
+  </div>
+
+  <!-- Passo 1 -->
+  <div class="step" id="step-1">
+    <span class="emoji">😅</span>
+    <h1>Não, ainda não é isso 😅</h1>
+    <p class="subtitle">Mas continue, você vai querer ver!</p>
+    <button class="btn" onclick="nextStep()">Continuar</button>
+  </div>
+
+  <!-- Passo 2 -->
+  <div class="step" id="step-2">
+    <span class="emoji">🤔</span>
+    <h1>Quase lá...</h1>
+    <p class="subtitle">Só um pouquinho mais de paciência!</p>
+    <button class="btn" onclick="nextStep()">Tá bom, continuar</button>
+  </div>
+
+  <!-- Passo 3 -->
+  <div class="step" id="step-3">
+    <span class="emoji">👀</span>
+    <h1>Você é curiosa hein? 😄</h1>
+    <p class="subtitle">Não resiste, né? Que jeito...</p>
+    <button class="btn" onclick="nextStep()">Claro que não!</button>
+  </div>
+
+  <!-- Passo 4 -->
+  <div class="step" id="step-4">
+    <span class="emoji">🎭</span>
+    <h1>Só mais uma vez... promessa! 🤞</h1>
+    <p class="subtitle">Juro que dessa vez é de verdade!</p>
+    <button class="btn" onclick="showFinal()">Tô acreditando!</button>
+  </div>
+
+  <!-- Tela Final -->
+  <div class="final" id="final">
+    <span class="confetti-emoji">🎉</span>
+    <h1>FELIZ ANIVERSÁRIO!!!</h1>
+    <p class="msg-final">
+      Hoje é o dia de celebrar uma pessoa incrível — e essa pessoa é você! 🎂<br><br>
+      Que esse dia seja tão especial quanto você é para mim. 💜
+    </p>
+
+    <!-- ════════════════════════════════════════════
+         GALERIA DE FOTOS — substitua os src abaixo
+         pelas suas imagens (ex: src="foto1.jpg")
+         ════════════════════════════════════════════ -->
+    <div class="gallery">
+
+      <div class="photo-slot">
+        <!-- FOTO 1: troque o src abaixo pela sua imagem -->
+        <!-- <img src="foto1.jpg" alt="Foto 1"> -->
+        <div class="photo-placeholder">
+          <span>📸</span>
+          Foto 1<br><small>coloque src="foto1.jpg"</small>
+        </div>
+      </div>
+
+      <div class="photo-slot">
+        <!-- FOTO 2: troque o src abaixo pela sua imagem -->
+        <!-- <img src="foto2.jpg" alt="Foto 2"> -->
+        <div class="photo-placeholder">
+          <span>📸</span>
+          Foto 2<br><small>coloque src="foto2.jpg"</small>
+        </div>
+      </div>
+
+      <div class="photo-slot">
+        <!-- FOTO 3: troque o src abaixo pela sua imagem -->
+        <!-- <img src="foto3.jpg" alt="Foto 3"> -->
+        <div class="photo-placeholder">
+          <span>📸</span>
+          Foto 3<br><small>coloque src="foto3.jpg"</small>
+        </div>
+      </div>
+
+      <div class="photo-slot">
+        <!-- FOTO 4: troque o src abaixo pela sua imagem -->
+        <!-- <img src="foto4.jpg" alt="Foto 4"> -->
+        <div class="photo-placeholder">
+          <span>📸</span>
+          Foto 4<br><small>coloque src="foto4.jpg"</small>
+        </div>
+      </div>
+
+    </div>
+    <!-- ════════════════════ FIM DA GALERIA ════════════════════ -->
+
+    <button class="btn" onclick="restart()">Repetir a brincadeira 😄</button>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 0;
+  const totalSteps = 5;
+
+  function updateProgress(step) {
+    const pct = (step / totalSteps) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  }
+
+  function nextStep() {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    currentStep++;
+    document.getElementById('step-' + currentStep).classList.add('active');
+    updateProgress(currentStep);
+  }
+
+  function showFinal() {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    document.getElementById('final').classList.add('active');
+    updateProgress(totalSteps);
+    launchConfetti();
+  }
+
+  function restart() {
+    document.getElementById('final').classList.remove('active');
+    currentStep = 0;
+    document.getElementById('step-0').classList.add('active');
+    updateProgress(0);
+  }
+
+  function launchConfetti() {
+    const colors = ['#9b72e8','#6db4f5','#f5b8e8','#ffe066','#7ee8a2'];
+    for (let i = 0; i < 80; i++) {
+      const c = document.createElement('div');
+      const size = 7 + Math.random() * 9;
+      c.style.cssText = `
+        position:fixed;
+        top:-10px;
+        left:${Math.random()*100}%;
+        width:${size}px;
+        height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'3px'};
+        opacity:0.9;
+        animation:fall ${1.5+Math.random()*2.5}s ease-in forwards;
+        animation-delay:${Math.random()*1.2}s;
+        pointer-events:none;
+        z-index:999;
+      `;
+      document.body.appendChild(c);
+      setTimeout(()=> c.remove(), 4000);
+    }
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fall {
+      0%   { transform: translateY(0) rotate(0deg); opacity:0.9; }
+      80%  { opacity:0.8; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity:0; }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
